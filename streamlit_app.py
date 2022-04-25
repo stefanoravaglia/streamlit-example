@@ -1,38 +1,111 @@
-from collections import namedtuple
-import altair as alt
-import math
-import pandas as pd
+import os
 import streamlit as st
 
-"""
-# Welcome to Streamlit!
+def secrets_display():
+    ''' app '''
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
+    '''
+    # Welcome to Streamlit!
 
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+    ## [Secrets management](https://docs.streamlit.io/streamlit-cloud/get-started/deploy-an-app/connect-to-data-sources/secrets-management)
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+    > Edit `/streamlit_app.py` to customize this app \n
+    > [documentation](https://docs.streamlit.io) \n
+    > [community forums](https://discuss.streamlit.io) \n
+
+    '''
+
+    ''' 
+    ---
+    ##### .\\\\.streamlit\secrets.toml
+    ##### remove from commits using .gitignore
+    ---
+    '''
+    st.write(st.secrets)
+    st.write(type(st.secrets))
+
+    '''
+    ---
+    ##### secrets are accessible via the st.secrets dict:
+    ##### by *key notation*: st.secrets["key"]
+    ---
+    '''
+    st.write("username: ", st.secrets["st_username"])
+    st.write("password: ", st.secrets["st_password"])
+    st.write("section: ", st.secrets["st_section"]["st_list"])
+    st.write(type(st.secrets["st_section"]["st_list"]))
+    st.write(type(st.secrets["st_section"].st_list))
+    '''
+    ---
+    ##### by *attribute notation*: st.secrets.key
+    ---
+    '''
+    st.write("username: ", st.secrets.st_username)
+    st.write("password: ", st.secrets.st_password)
+    st.write("section: ", st.secrets.st_section["st_list"])
+    st.write(type(st.secrets.st_section["st_list"]))
+    st.write(type(st.secrets.st_section.st_list))
+
+    '''
+    ---
+    ##### root-level secrets are accessible as environment variables, too:
+    ---
+    '''
+    st.write(
+        "Has environment variables been set:",
+        os.environ["st_username"] == st.secrets["st_username"]
+    )
+
+    '''
+    ---
+    ##### TOML sections to compactly pass multiple secrets as a single attribute
+    ---
+    '''
+
+    def f(*args, **kwargs):
+        ''' accessing args and key-value args
+        '''
+        st.write(" - args [{}]".format(type(args))) # touple
+        for i, arg in enumerate(args):
+            st.write( '- {}. {}'.format(i, arg))
+
+        st.write("- kwargs [{}]".format(type(kwargs))) # dict
+        for key, value in kwargs.items():
+            st.write( '- {} = {}'.format(key, value))
+
+    st.write(st.secrets.st_arguments)
+    st.write(type(st.secrets.st_arguments))
+
+    f(*st.secrets.st_arguments, **st.secrets.st_arguments)
+
+    '''
+    ...a
+    '''
+    
+def secrets_manage():
+    ''' st.secrets dict managing
+    '''
+    pass
+
+def secrets_check():
+    ''' tests if st.secrets dict is ok
+    '''
+    return st.secrets.has_key("st_username")
+
+def app():
+    ''' the app
+    '''
+    secrets_display()
+
+def main():
+    ''' launches app if st.secrets dict is ok
+    '''
+    if (secrets_check()):
+        app()
+    else:
+        secrets_manage()
 
 
-with st.echo(code_location='below'):
-    total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-    num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
-
-    Point = namedtuple('Point', 'x y')
-    data = []
-
-    points_per_turn = total_points / num_turns
-
-    for curr_point_num in range(total_points):
-        curr_turn, i = divmod(curr_point_num, points_per_turn)
-        angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-        radius = curr_point_num / total_points
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        data.append(Point(x, y))
-
-    st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-        .mark_circle(color='#0068c9', opacity=0.5)
-        .encode(x='x:Q', y='y:Q'))
+# app entry point
+if __name__ == "__main__":
+    main()
